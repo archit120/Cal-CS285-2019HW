@@ -36,6 +36,8 @@ class BCAgent(BaseAgent):
 
     def add_to_replay_buffer(self, paths):
         self.replay_buffer.add_rollouts(paths)
+    def clear_buffer(self):
+        self.replay_buffer = ReplayBuffer(self.agent_params['max_replay_buffer_size'])
 
     def sample(self, batch_size):
         return self.replay_buffer.sample_random_data(batch_size) ## TODO: look in here and implement this
