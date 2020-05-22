@@ -30,6 +30,8 @@ class MLPPolicy(BasePolicy):
         self.learning_rate = learning_rate
         self.training = training
         self.nn_baseline = nn_baseline
+        self.observations_pl = None
+        self.actions_pl = None
 
         # build TF graph
         with tf.variable_scope(policy_scope, reuse=tf.AUTO_REUSE):
@@ -108,14 +110,22 @@ class MLPPolicy(BasePolicy):
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs):
 
-        # TODO: GETTHIS from HW1
+        if len(obs.shape)>1:
+            observation = obs
+        else:
+            observation = obs[None]
+
+        #  return the action that the policy prescribes
+        # HINT1: you will need to call self.sess.run
+        # HINT2: the tensor we're interested in evaluating is self.sample_ac
+        # HINT3: in order to run self.sample_ac, it will need observation fed into the feed_dict
+
+        self.sample_ac = self.sess.run(self.parameters[0], feed_dict={self.observations_pl: observation})
+        # print(self.sample_ac)
+        return self.sample_ac
 
 #####################################################
 #####################################################
-
-# class MLPPolicySL(MLPPolicy):
-
-    # TODO: GETTHIS from HW1 (or comment it out, since you don't need it for this homework)
 
 #####################################################
 #####################################################
@@ -147,7 +157,7 @@ class MLPPolicyPG(MLPPolicy):
         # define the log probability of seen actions/observations under the current policy
         self.define_log_prob()
 
-        # TODO: define the loss that should be optimized when training a policy with policy gradient
+        # TODO : define the loss that should be optimized when training a policy with policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
             # is the expectation over collected trajectories of:
             # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
@@ -157,20 +167,20 @@ class MLPPolicyPG(MLPPolicy):
             # to get [Q_t - b_t]
         # HINT4: don't forget that we need to MINIMIZE this self.loss
             # but the equation above is something that should be maximized
-        self.loss = tf.reduce_sum(TODO)
+        self.loss = tf.reduce_sum( -self.logprob_n * self.adv_n)
 
-        # TODO: define what exactly the optimizer should minimize when updating the policy
-        self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(TODO)
+        # : define what exactly the optimizer should minimize when updating the policy
+        self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
         if self.nn_baseline:
             # TODO: define the loss that should be optimized for training the baseline
             # HINT1: use tf.losses.mean_squared_error, similar to SL loss from hw1
             # HINT2: we want predictions (self.baseline_prediction) to be as close as possible to the labels (self.targets_n)
                 # see 'update' function below if you don't understand what's inside self.targets_n
-            self.baseline_loss = TODO
+            self.baseline_loss = tf.losses.mean_squared_error(self.targets_n, self.baseline_prediction)
 
             # TODO: define what exactly the optimizer should minimize when updating the baseline
-            self.baseline_update_op = tf.train.AdamOptimizer(self.learning_rate).minimize(TODO)
+            self.baseline_update_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.baseline_loss)
 
     #########################
 
@@ -180,6 +190,16 @@ class MLPPolicyPG(MLPPolicy):
         # HINT1: query it with observation(s) to get the baseline value(s)
         # HINT2: see build_baseline_forward_pass (above) to see the tensor that we're interested in
         # HINT3: this will be very similar to how you implemented get_action (above)
+
+        if len(obs.shape)>1:
+            observation = obs
+        else:
+            observation = obs[None]
+            
+        self.sample_ac = self.sess.run(self.parameters[0], feed_dict={self.observations_pl: observation})
+        # print(self.sample_ac)
+        return self.sample_ac
+
         return TODO
 
     def update(self, observations, acs_na, adv_n=None, acs_labels_na=None, qvals=None):
