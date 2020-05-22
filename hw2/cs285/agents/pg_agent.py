@@ -23,6 +23,7 @@ class PGAgent(BaseAgent):
             # which indicates similar network structure (layout/inputs/outputs), 
             # but differences in training procedure 
             # between supervised learning and policy gradients
+        print("hi", self.agent_params['discrete'])
         self.actor = MLPPolicyPG(sess, 
                                  self.agent_params['ac_dim'],
                                  self.agent_params['ob_dim'],
@@ -164,7 +165,7 @@ class PGAgent(BaseAgent):
         indices = np.arange(0, len(rewards))
 
         # 2) create a list where the entry at each index (t') is gamma^(t')
-        discounts = np.pow(indices, self.gamma)
+        discounts = np.power(self.gamma, indices)
 
         # 3) create a list where the entry at each index (t') is gamma^(t') * r_{t'}
         discounted_rewards = discounts*rewards
@@ -196,8 +197,8 @@ class PGAgent(BaseAgent):
             indices = np.arange(start_time_index, len(rewards))
 
             # 2) create a list where the entry at each index (t') is gamma^(t'-t)
-            discounts = np.pow(self.gamma, indices - start_time_index)
-
+            discounts = np.power(self.gamma, indices - start_time_index)
+            # print(discounts)
             # 3) create a list where the entry at each index (t') is gamma^(t'-t) * r_{t'}
             # Hint: remember that t' goes from t to T-1, so you should use the rewards from those indices as well
             discounted_rtg = discounts * rewards[start_time_index:]

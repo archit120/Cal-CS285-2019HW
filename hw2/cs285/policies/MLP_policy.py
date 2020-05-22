@@ -119,10 +119,9 @@ class MLPPolicy(BasePolicy):
         # HINT1: you will need to call self.sess.run
         # HINT2: the tensor we're interested in evaluating is self.sample_ac
         # HINT3: in order to run self.sample_ac, it will need observation fed into the feed_dict
-
-        self.sample_ac = self.sess.run(self.parameters[0], feed_dict={self.observations_pl: observation})
-        # print(self.sample_ac)
-        return self.sample_ac
+        # print(self.discrete)
+        act = self.sess.run(self.sample_ac, feed_dict={self.observations_pl: observation})
+        return act
 
 #####################################################
 #####################################################
@@ -191,16 +190,7 @@ class MLPPolicyPG(MLPPolicy):
         # HINT2: see build_baseline_forward_pass (above) to see the tensor that we're interested in
         # HINT3: this will be very similar to how you implemented get_action (above)
 
-        if len(obs.shape)>1:
-            observation = obs
-        else:
-            observation = obs[None]
-            
-        self.sample_ac = self.sess.run(self.parameters[0], feed_dict={self.observations_pl: observation})
-        # print(self.sample_ac)
-        return self.sample_ac
-
-        return TODO
+        return self.sess.run(self.baseline_prediction, feed_dict={self.observations_pl: obs})
 
     def update(self, observations, acs_na, adv_n=None, acs_labels_na=None, qvals=None):
         assert(self.training, 'Policy must be created with training=True in order to perform training updates...')
@@ -211,7 +201,8 @@ class MLPPolicyPG(MLPPolicy):
             targets_n = (qvals - np.mean(qvals))/(np.std(qvals)+1e-8)
             # TODO: update the nn baseline with the targets_n
             # HINT1: run an op that you built in define_train_op
-            TODO
+            _, _ = self.sess.run([self.baseline_update_op, self.baseline_loss], feed_dict={self.observations_pl: observations, self.targets_n: targets_n})
+
         return loss
 
 #####################################################

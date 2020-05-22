@@ -164,7 +164,7 @@ class RL_Trainer(object):
             ## look in utils and implement sample_n_trajectories
             train_video_paths = sample_n_trajectories(self.env, collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
 
-        if itr == 0:
+        if itr == 0 and load_initial_expertdata is not None:
             with open(load_initial_expertdata, "rb") as pickle_in:
                 loaded_paths = pickle.load(pickle_in)
             return loaded_paths, 0, train_video_paths
