@@ -174,7 +174,7 @@ class PGAgent(BaseAgent):
         sum_of_discounted_rewards = np.sum(discounted_rewards)
 
         # 5) create a list of length T-1, where each entry t contains that scalar
-        list_of_discounted_returns = np.zeros(rewards.shape)*sum_of_discounted_rewards
+        list_of_discounted_returns = np.ones(rewards.shape)*sum_of_discounted_rewards
 
         return list_of_discounted_returns
 
