@@ -22,7 +22,7 @@ class PG_Trainer(object):
             'gamma': params['discount'],
             'standardize_advantages': not(params['dont_standardize_advantages']),
             'reward_to_go': params['reward_to_go'],
-            'nn_baseline': params['nn_baseline'],
+            'nn_baseline': params['nn_baseline'] or params['gae'],
             'gae': params['gae'],
             'lambda': params['lambda'],
         }

@@ -133,7 +133,7 @@ class PGAgent(BaseAgent):
             b_n = b_n_unnormalized * np.std(q_values) + np.mean(q_values)
             adv_n = q_values - b_n
             if self.gae:
-                adv_n = _generalized_advantage_estimator(adv_n)
+                adv_n = self._generalized_advantage_estimator(adv_n)
         # Else, just set the advantage to [Q]
         else:
             adv_n = q_values.copy()

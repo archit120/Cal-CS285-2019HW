@@ -71,3 +71,9 @@ The best paramter was 50000 batch size and 0.02 LR.
 with both reward-to-go and the baseline should achieve an average score close to 200.
 
 <img src="graph_hc_2.png" width="400"/>
+
+### Bonus
+
+For Bonus I implemented GAE- λ. The graph below compares average and max-returns on Walked2D with a neural network baseline vs GAE with lambda = 0.3.
+
+<img src="gae.png" width="400"/>
