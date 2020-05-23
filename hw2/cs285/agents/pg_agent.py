@@ -17,13 +17,19 @@ class PGAgent(BaseAgent):
         self.standardize_advantages = self.agent_params['standardize_advantages']
         self.nn_baseline = self.agent_params['nn_baseline'] 
         self.reward_to_go = self.agent_params['reward_to_go'] 
+        self.gae = self.agent_params['gae']
+
+        if self.gae:
+            self.nn_baseline = True
+            self.reward_to_go = True
+            self.gae_lambda = self.agent_params['lambda']
 
         # actor/policy
         # NOTICE that we are using MLPPolicyPG (hw2), instead of MLPPolicySL (hw1)
             # which indicates similar network structure (layout/inputs/outputs), 
             # but differences in training procedure 
             # between supervised learning and policy gradients
-        print("hi", self.agent_params['discrete'])
+
         self.actor = MLPPolicyPG(sess, 
                                  self.agent_params['ac_dim'],
                                  self.agent_params['ob_dim'],
@@ -121,11 +127,13 @@ class PGAgent(BaseAgent):
         # HINT1: pass obs into the neural network that you're using to learn the baseline
             # extra hint if you're stuck: see your actor's run_baseline_prediction
         # HINT2: advantage should be [Q-b]
+
         if self.nn_baseline:
             b_n_unnormalized = self.actor.run_baseline_prediction(obs)
             b_n = b_n_unnormalized * np.std(q_values) + np.mean(q_values)
             adv_n = q_values - b_n
-
+            if self.gae:
+                adv_n = _generalized_advantage_estimator(adv_n)
         # Else, just set the advantage to [Q]
         else:
             adv_n = q_values.copy()
@@ -210,3 +218,16 @@ class PGAgent(BaseAgent):
             all_discounted_cumsums.append(sum_discounted_rtg)
         list_of_discounted_cumsums = np.array(all_discounted_cumsums)
         return list_of_discounted_cumsums 
+
+    def _generalized_advantage_estimator(self, temporal_differences):
+
+        adv_n = []
+
+        for start_time_index in range(len(temporal_differences)):
+            indices = np.arange(start_time_index, len(temporal_differences))
+            mul_fact = np.power(self.gamma*self.gae_lambda, indices-start_time_index)
+            adv = mul_fact*temporal_differences[start_time_index:]
+            adv_sum = np.sum(adv)
+            adv_n.append(adv_sum)
+        
+        return np.array(adv_n)
