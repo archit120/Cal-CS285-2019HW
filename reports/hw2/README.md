@@ -2,7 +2,7 @@
 
 ---
 
-_Disclaimer: I am not an official student and these assignments have no been evaluated. I did them ony my own for learning purposes_
+_Disclaimer: These assignments are my own work and have not been evaluated_
 
 ---
 

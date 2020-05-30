@@ -189,7 +189,7 @@ class RL_Trainer(object):
 
                 # collect data, batch_size is the number of transitions you want to collect.
         train_video_paths = None
-        if self.log_video:
+        if self.logvideo:
             print('\nCollecting train rollouts to be used for saving videos...')
             ## look in utils and implement sample_n_trajectories
             train_video_paths = sample_n_trajectories(self.env, collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
@@ -223,8 +223,9 @@ class RL_Trainer(object):
             # HINT: use the agent's train function
             # HINT: print or plot the loss for debugging!
 
-            self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
+            loss = self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
             # print(self.agent.actor.loss)
+        return loss
 
     def do_relabel_with_expert(self, expert_policy, paths):
         print("\nRelabelling collected observations with labels from an expert policy...")

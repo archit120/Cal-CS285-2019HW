@@ -210,3 +210,62 @@ class MLPPolicyPG(MLPPolicy):
 #####################################################
 #####################################################
 
+class MLPPolicyAC(MLPPolicy):
+
+    def define_placeholders(self):
+        # placeholder for observations
+        self.observations_pl = tf.placeholder(shape=[None, self.ob_dim], name="ob", dtype=tf.float32)
+
+        # placeholder for actions
+        if self.discrete:
+            self.actions_pl = tf.placeholder(shape=[None], name="ac", dtype=tf.int32)
+        else:
+            self.actions_pl = tf.placeholder(shape=[None, self.ac_dim], name="ac", dtype=tf.float32)
+
+        if self.training:
+            # placeholder for advantage
+            self.adv_n = tf.placeholder(shape=[None], name="adv", dtype=tf.float32)
+
+    #########################
+
+    def define_train_op(self):
+
+        # define the log probability of seen actions/observations under the current policy
+        self.define_log_prob()
+
+        #  : define the loss that should be optimized when training a policy with policy gradient
+        # HINT1: Recall that the expression that we want to MAXIMIZE
+            # is the expectation over collected trajectories of:
+            # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
+        # HINT2: see define_log_prob (above)
+            # to get log pi(a_t|s_t)
+        # HINT3: look for a placeholder above that will be populated with advantage values 
+            # to get [Q_t - b_t]
+        # HINT4: don't forget that we need to MINIMIZE this self.loss
+            # but the equation above is something that should be maximized
+        self.loss = tf.reduce_sum( -self.logprob_n * self.adv_n)
+
+        # : define what exactly the optimizer should minimize when updating the policy
+        self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
+
+    #########################
+
+    def run_baseline_prediction(self, obs):
+        
+        # : query the neural net that's our 'baseline' function, as defined by an mlp above
+        # HINT1: query it with observation(s) to get the baseline value(s)
+        # HINT2: see build_baseline_forward_pass (above) to see the tensor that we're interested in
+        # HINT3: this will be very similar to how you implemented get_action (above)
+
+        return self.sess.run(self.baseline_prediction, feed_dict={self.observations_pl: obs})
+
+    def update(self, observations, acs_na, adv_n=None):
+        assert(self.training, 'Policy must be created with training=True in order to perform training updates...')
+
+        _, loss = self.sess.run([self.train_op, self.loss], feed_dict={self.observations_pl: observations, self.actions_pl: acs_na, self.adv_n: adv_n})
+        return loss
+
+#####################################################
+#####################################################
+
+
