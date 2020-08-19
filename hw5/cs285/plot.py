@@ -56,7 +56,9 @@ def plot_data(data, value="AverageReturn"):
     sns.tsplot(data=data, time="Iteration", value=value, unit="Unit", condition="Condition")
     plt.legend(loc='best').draggable()
     # plt.legend(loc='best', bbox_to_anchor=(1, 1), fontsize=8).draggable()
-    plt.show()
+    # plt.show() Working headless
+    plt.savefig('plot.png', dpi=300, bbox_inches='tight')
+
 
 
 def get_datasets(fpath, condition=None):

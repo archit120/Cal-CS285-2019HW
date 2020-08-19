@@ -5,6 +5,7 @@ Adapted for CS294-112 Fall 2018 by Soroush Nasiriany, Sid Reddy, and Greg Kahn
 Adapted for CS294-112 Fall 2018 with <3 by Michael Chang, some experiments by Greg Kahn, beta-tested by Sid Reddy
 """
 import numpy as np
+import mujoco_py
 import tensorflow as tf
 import tensorflow_probability as tfp
 import gym
@@ -540,14 +541,14 @@ def train_AC(
             elif dm == 'hist' or dm == 'rbf':
                 ### PROBLEM 1
                 ### YOUR CODE HERE
-                raise NotImplementedError
+                exploration.fit_density_model(ob_no)
             else:
                 assert False
 
             # 2. Modify the reward
             ### PROBLEM 1
             ### YOUR CODE HERE
-            raise NotImplementedError
+            re_n = exploration.modify_reward(re_n, ob_no)
 
             print('average state', np.mean(ob_no, axis=0))
             print('average action', np.mean(ac_na, axis=0))

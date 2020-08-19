@@ -37,7 +37,10 @@ class Histogram(Density_Model):
                 2. increment self.total by "increment" 
         """
         bin_name = self.preprocessor(state)
-        raise NotImplementedError
+        if bin_name not in self.hist:
+            self.hist[bin_name] = 0
+        self.hist[bin_name] += increment
+        self.total += increment
 
     def get_count(self, states):
         """
@@ -55,7 +58,12 @@ class Histogram(Density_Model):
                     1. get the bin_name using self.preprocessor
                     2. get the value of self.hist with key bin_name
         """
-        raise NotImplementedError
+        
+        counts = np.zeros((states.shape[0]))
+
+        for i in range(states.shape[0]):
+            counts[i] += self.hist[self.preprocessor(states[i])]
+
         return counts
 
     def get_prob(self, states):
@@ -72,7 +80,10 @@ class Histogram(Density_Model):
             NOTE:
                 remember to normalize by float(self.total)
         """
-        raise NotImplementedError
+
+        counts = self.get_count(states)
+        probs = counts/float(self.total)
+
         return probs
 
 class RBF(Density_Model):
@@ -99,8 +110,7 @@ class RBF(Density_Model):
                 self.means: np array (B, ob_dim)
         """
         B, ob_dim = len(data), len(data[0])
-        raise NotImplementedError
-        self.means = None
+        self.means = np.array(data)
         assert self.means.shape == (B, ob_dim)
 
     def get_prob(self, states):
@@ -139,21 +149,22 @@ class RBF(Density_Model):
             assert states.ndim == self.means.ndim and ob_dim == replay_dim
 
             # 1. Compute deltas
-            deltas = raise NotImplementedError
+            deltas = np.repeat(np.reshape(states, (b, 1, ob_dim)), B, 1) - np.repeat(np.reshape(self.means, (1, B, ob_dim)), b, 0)
             assert deltas.shape == (b, B, ob_dim)
-
+            
             # 2. Euclidean distance
-            euc_dists = raise NotImplementedError
+            euc_dists = np.sum(deltas*deltas, 2)
             assert euc_dists.shape == (b, B)
 
             # Gaussian
-            gaussians = raise NotImplementedError
+            gaussians = np.exp(-euc_dists/(2*self.sigma*self.sigma))
             assert gaussians.shape == (b, B)
 
             # 4. Average
-            densities = raise NotImplementedError
-            assert densities.shape == (b,)
+            densities = np.sum(gaussians, 1)/B
 
+            assert densities.shape == (b,)
+    
             return densities
 
 class Exemplar(Density_Model):
@@ -229,8 +240,8 @@ class Exemplar(Density_Model):
 
             Hint: use build_mlp
         """
-        z_mean = raise NotImplementedError
-        z_logstd = raise NotImplementedError
+        # z_mean = raise NotImplementedError
+        # z_logstd = raise NotImplementedError
         return tfp.distributions.MultivariateNormalDiag(loc=z_mean, scale_diag=tf.exp(z_logstd))
 
     def make_prior(self, z_size):
@@ -245,8 +256,8 @@ class Exemplar(Density_Model):
                 prior_mean and prior_logstd are for a standard normal distribution
                     both have dimension z_size
         """
-        prior_mean = raise NotImplementedError
-        prior_logstd = raise NotImplementedError
+        # prior_mean = raise NotImplementedError
+        # prior_logstd = raise NotImplementedError
         return tfp.distributions.MultivariateNormalDiag(loc=prior_mean, scale_diag=tf.exp(prior_logstd))
 
     def make_discriminator(self, z, output_size, scope, n_layers, hid_size):
@@ -268,7 +279,7 @@ class Exemplar(Density_Model):
 
             Hint: use build_mlp
         """
-        logit = raise NotImplementedError
+        # logit = raise NotImplementedError
         return tfp.distributions.Bernoulli(logit)
 
     def forward_pass(self, state1, state2):
@@ -306,9 +317,9 @@ class Exemplar(Density_Model):
         prior = self.make_prior(self.hid_dim/2)
 
         # Sampled Latent
-        z1 = raise NotImplementedError
-        z2 = raise NotImplementedError
-        z = raise NotImplementedError
+        # z1 = raise NotImplementedError
+        # z2 = raise NotImplementedError
+        # z = raise NotImplementedError
 
         # Discriminator
         discriminator = make_discriminator(z, 1, 'discriminator', n_layers=2, hid_size=self.hid_dim)
@@ -372,8 +383,8 @@ class Exemplar(Density_Model):
                     compute the probability density of x from the discriminator
                     likelihood (see homework doc)
         """
-        likelihood = raise NotImplementedError
-        # avoid divide by 0 and log(0)
-        likelihood = np.clip(np.squeeze(likelihood), 1e-5, 1-1e-5)
-        prob = raise NotImplementedError
+        # likelihood = raise NotImplementedError
+        # # avoid divide by 0 and log(0)
+        # likelihood = np.clip(np.squeeze(likelihood), 1e-5, 1-1e-5)
+        # prob = raise NotImplementedError
         return prob

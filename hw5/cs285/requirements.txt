@@ -1,6 +1,8 @@
 gym==0.10.5
 mujoco-py==1.50.1.56
 tensorflow
+tensorflow-probability==0.5
 numpy
-seaborn
+seaborn==0.9
 tqdm
+matplotlib==3.0.3
